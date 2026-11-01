@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard · MapleLux Jobs</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="navbar">
+    <div class="logo">
+      <i class="fas fa-leaf"></i>
+      <span>Maple<span class="light">Lux</span></span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">← Back to Job Board</a>
+      <a href="#" style="color: #1e6f5c; font-weight: 700;"><i class="fas fa-lock"></i> Admin Access</a>
+    </div>
+    <button class="btn-outline" id="logoutBtn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </header>
+
+  <main class="container" style="max-width: 800px;">
+    
+    <!-- Login Box -->
+    <div id="loginBox" class="modal" style="position: relative; margin: 4rem auto; display: block;">
+      <div class="modal-icon" style="background:#e5f3ee; color:#1e6f5c;"><i class="fas fa-user-shield"></i></div>
+      <h3>Admin Login</h3>
+      <p>You must be an administrator to post new jobs.</p>
+      
+      <form id="adminLoginForm">
+        <label for="adminPassword">Password</label>
+        <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+        <button type="submit" class="btn-pay" style="margin-top: 1rem;">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </form>
+      <div class="modal-footnote" style="margin-top: 1rem;">
+        Demo password: <strong>admin123</strong>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard (Hidden by default) -->
+    <div id="adminDashboard" style="display: none; margin-top: 3rem;">
+      <div class="category-header" style="margin-top: 0;">
+        <div class="icon-badge formal"><i class="fas fa-plus-circle"></i></div>
+        <h2>Post a New Job</h2>
+        <span class="tagline">Add a new listing to the board</span>
+      </div>
+
+      <div class="modal" style="position: relative; display: block; max-width: 100%;">
+        <form id="postJobForm">
+          <label for="postJobTitleInput">Job Title</label>
+          <input type="text" id="postJobTitleInput" placeholder="e.g. Senior Software Engineer" required>
+
+          <label for="postCompany">Company Name</label>
+          <input type="text" id="postCompany" placeholder="e.g. Tech Corp" required>
+
+          <label for="postDesc">Job Description</label>
+          <textarea id="postDesc" placeholder="Brief description of the role" required style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #d0e2dc; border-radius: 14px; font-size: 0.95rem; background: #f9fdfb; outline: none; margin-bottom: 1rem; min-height: 100px; font-family: inherit;"></textarea>
+
+          <div style="display: flex; gap: 1rem;">
+            <div style="flex: 1;">
+              <label for="postCountry">Country</label>
+              <select id="postCountry" required>
+                <option value="canada">🇨🇦 Canada</option>
+                <option value="luxembourg">🇱🇺 Luxembourg</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <label for="postType">Job Type</label>
+              <select id="postType" required>
+                <option value="formal">💼 Formal</option>
+                <option value="informal">🛠️ Informal</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <div style="flex: 1;">
+              <label for="postFee">App Fee (CAD/€)</label>
+              <input type="number" id="postFee" placeholder="e.g. 15" min="1" required>
+            </div>
+            <div style="flex: 1;">
+              <label for="postSalary">Salary / Rate</label>
+              <input type="text" id="postSalary" placeholder="e.g. CAD 100k">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-pay" style="margin-top: 1.5rem;">
+            <i class="fas fa-check"></i> Publish Job
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Admin Authentication Logic
+    const adminPassword = "admin123"; // Change this to your real password
+    const loginBox = document.getElementById('loginBox');
+    const adminDashboard = document.getElementById('adminDashboard');
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Check if already logged in
+    if (sessionStorage.getItem('isAdmin') === 'true') {
+      showDashboard();
+    }
+
+    adminLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const enteredPassword = document.getElementById('adminPassword').value;
+      
+      if (enteredPassword === adminPassword) {
+        sessionStorage.setItem('isAdmin', 'true');
+        showDashboard();
+      } else {
+        alert('Incorrect password. Access denied.');
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('isAdmin');
+      location.reload();
+    });
+
+    function showDashboard() {
+      loginBox.style.display = 'none';
+      adminDashboard.style.display = 'block';
+      logoutBtn.style.display = 'block';
+    }
+
+    // Post Job Logic (Saves to LocalStorage so it persists on the main page)
+    document.getElementById('postJobForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const job = {
+        title: document.getElementById('postJobTitleInput').value.trim(),
+        company: document.getElementById('postCompany').value.trim(),
+        desc: document.getElementById('postDesc').value.trim(),
+        country: document.getElementById('postCountry').value,
+        type: document.getElementById('postType').value,
+        fee: document.getElementById('postFee').value,
+        salary: document.getElementById('postSalary').value.trim() || 'Competitive'
+      };
+
+      // Get existing jobs from localStorage, or start a new array
+      let savedJobs = JSON.parse(localStorage.getItem('mapleLuxJobs')) || [];
+      savedJobs.push(job);
+      localStorage.setItem('mapleLuxJobs', JSON.stringify(savedJobs));
+
+      alert('Job successfully posted! It will now appear on the main job board.');
+      document.getElementById('postJobForm').reset();
+    });
+  </script>
+</body>
+</html>

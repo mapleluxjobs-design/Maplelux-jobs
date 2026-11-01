@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Available Jobs · MapleLux</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">
+      <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.6rem;">
+        <i class="fas fa-leaf"></i>
+        <span>Maple<span class="light">Lux</span></span>
+      </a>
+    </div>
+    <div class="nav-links">
+      <a href="index.html#how-it-works">How it Works</a>
+      <a href="jobs.html" style="color: #1e6f5c; font-weight: 700;">Available Jobs</a>
+      <a href="index.html#contact">Contact</a>
+    </div>
+    <a href="index.html" class="btn-outline" style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+      <i class="fas fa-home"></i> Home
+    </a>
+  </header>
+
+  <main class="container" style="margin-top: 2rem;">
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h1 style="font-size: 2.2rem; color: #0b2b26;">Available Opportunities</h1>
+      <p style="color: #6b8f86;">Find your next role and start your application today.</p>
+    </div>
+
+    <!-- Search / filter -->
+    <div class="search-section">
+      <div class="filter-group">
+        <input type="text" placeholder="🔍 Job title or keyword" id="searchInput">
+        <select id="countrySelect">
+          <option value="all">🌍 All countries</option>
+          <option value="canada">🇨🇦 Canada</option>
+          <option value="luxembourg">🇱🇺 Luxembourg</option>
+        </select>
+        <select id="typeSelect">
+          <option value="all">📂 All job types</option>
+          <option value="formal">💼 Formal</option>
+          <option value="informal">🛠️ Informal</option>
+        </select>
+      </div>
+      <button class="search-btn" id="filterBtn"><i class="fas fa-sliders-h"></i> Filter jobs</button>
+    </div>
+
+    <!-- FORMAL JOBS -->
+    <div id="formal">
+      <div class="category-header">
+        <div class="icon-badge formal"><i class="fas fa-briefcase"></i></div>
+        <h2>Formal jobs</h2>
+        <span class="count" id="formalCount">0 roles</span>
+        <span class="tagline">Professional & full-time careers</span>
+      </div>
+
+      <div class="job-grid" id="formalGrid">
+        <!-- Jobs injected by JS -->
+      </div>
+    </div>
+
+    <!-- INFORMAL JOBS -->
+    <div id="informal">
+      <div class="category-header">
+        <div class="icon-badge informal"><i class="fas fa-tools"></i></div>
+        <h2>Informal jobs</h2>
+        <span class="count" id="informalCount">0 gigs</span>
+        <span class="tagline">Gigs, casual & part-time work</span>
+      </div>
+
+      <div class="job-grid" id="informalGrid">
+        <!-- Jobs injected by JS -->
+      </div>
+    </div>
+
+    <p id="noResults" style="display: none; text-align: center; margin-top: 2.5rem; color: #6b8f86; font-size: 1.1rem;">No jobs match your filter. Try another keyword, country, or job type.</p>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

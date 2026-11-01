@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Appointment & Pay · MapleLux Jobs</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .wizard-container { max-width: 650px; margin: 3rem auto; background: white; border-radius: 28px; padding: 2.5rem; box-shadow: 0 10px 30px rgba(0,30,20,0.05); border: 1px solid #e9f3ef; }
+    .step-indicator { display: flex; justify-content: space-between; margin-bottom: 2rem; position: relative; }
+    .step-indicator::before { content: ''; position: absolute; top: 15px; left: 0; right: 0; height: 2px; background: #e2f0ea; z-index: 1; }
+    .step { position: relative; z-index: 2; background: white; padding: 0 5px; text-align: center; font-size: 0.8rem; font-weight: 600; color: #8aa89f; }
+    .step-circle { width: 32px; height: 32px; border-radius: 50%; background: #f0f7f4; color: #8aa89f; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; border: 2px solid #e2f0ea; transition: 0.3s; }
+    .step.active .step-circle { background: #1e6f5c; color: white; border-color: #1e6f5c; }
+    .step.active { color: #1e6f5c; }
+    
+    .wizard-step { display: none; }
+    .wizard-step.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .job-summary { background: #f9fdfb; border: 1px solid #e2f0ea; border-radius: 16px; padding: 1.2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .job-summary h4 { font-size: 1.1rem; color: #0b2b26; margin-bottom: 0.2rem; }
+    .job-summary p { font-size: 0.9rem; color: #6b8f86; }
+    .job-summary .fee-tag { background: #fff4e5; color: #b85e00; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.9rem; border: 1px solid #ffd8a3; }
+    
+    .wizard-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
+    .wizard-buttons button { flex: 1; }
+    .btn-back { background: #f0f7f4; border: none; padding: 1rem; border-radius: 50px; font-weight: 700; color: #2c6b5b; cursor: pointer; transition: 0.2s; }
+    .btn-back:hover { background: #e2f0ea; }
+
+    .wizard-form-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; }
+    .wizard-form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #2c4b4a; margin-bottom: 0.4rem; }
+    .wizard-form-group input, 
+    .wizard-form-group select {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 1px solid #d0e2dc;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      background: #f9fdfb;
+      outline: none;
+      transition: 0.2s;
+    }
+    .wizard-form-group input:focus, 
+    .wizard-form-group select:focus {
+      border-color: #1e6f5c;
+      box-shadow: 0 0 0 3px rgba(30, 111, 92, 0.1);
+      background: white;
+    }
+
+    .doc-item { display: flex; align-items: flex-start; gap: 0.8rem; background: #f9fdfb; border: 1px solid #e2f0ea; padding: 1rem; border-radius: 12px; margin-bottom: 0.8rem; cursor: pointer; transition: 0.2s; }
+    .doc-item:hover { background: #f0f7f4; }
+    .doc-item input[type="checkbox"] { margin-top: 0.2rem; width: 18px; height: 18px; accent-color: #1e6f5c; cursor: pointer; flex-shrink: 0; }
+    .doc-item-text { font-size: 0.9rem; color: #2c4b4a; line-height: 1.4; }
+    .doc-item-text strong { color: #0b2b26; display: block; margin-bottom: 0.2rem; font-size: 0.95rem; }
+    .doc-item-text span { color: #6b8f86; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">
+      <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.6rem;">
+        <i class="fas fa-leaf"></i>
+        <span>Maple<span class="light">Lux</span></span>
+      </a>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">← Back to jobs</a>
+    </div>
+    <button class="btn-outline" style="visibility: hidden;">Placeholder</button>
+  </header>
+
+  <main class="container">
+    <div class="wizard-container">
+      
+      <div class="step-indicator">
+        <div class="step active" id="step1-indicator">
+          <div class="step-circle">1</div>
+          Appointment
+        </div>
+        <div class="step" id="step2-indicator">
+          <div class="step-circle">2</div>
+          Details
+        </div>
+        <div class="step" id="step3-indicator">
+          <div class="step-circle">3</div>
+          Documents
+        </div>
+        <div class="step" id="step4-indicator">
+          <div class="step-circle">4</div>
+          Payment
+        </div>
+      </div>
+
+      <div class="job-summary" id="jobSummary">
+        <div>
+          <h4 id="summaryJobTitle">Loading...</h4>
+          <p id="summaryCompany">Loading...</p>
+        </div>
+        <div class="fee-tag" id="summaryFee">€0</div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="wizard-step active" id="step1">
+        <h2 style="font-size: 1.5rem; color: #0b2b26; margin-bottom: 0.5rem;">Book Your Interview</h2>
+        <p style="color: #4b6560; font-size: 0.95rem; margin-bottom: 1.5rem;">Select a preferred working day within the next week for your virtual orientation call.</p>
+        
+        <div class="wizard-form-group">
+          <label for="apptDate">Select Available Date</label>
+          <select id="apptDate" required>
+            <option value="">Loading available dates...</option>
+          </select>
+        </div>
+        
+        <div class="wizard-form-group">
+          <label for="apptTime">Select Time</label>
+          <select id="apptTime" required>
+            <option value="">Choose a time slot</option>
+            <option value="09:00 AM">09:00 AM - 10:00 AM</option>
+            <option value="11:00 AM">11:00 AM - 12:00 PM</option>
+            <option value="02:00 PM">02:00 PM - 03:00 PM</option>
+            <option value="04:00 PM">04:00 PM - 05:00 PM</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn-pay" id="toStep2Btn" disabled>Continue to Details <i class="fas fa-arrow-right"></i></button>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="wizard-step" id="step2">
+        <h2 style="font-size: 1.5rem; color: #0b2b26; margin-bottom: 0.5rem;">Confirm Your Details</h2>
+        <p style="color: #4b6560; font-size: 0.95rem; margin-bottom: 1.5rem;">We'll send the appointment link and payment receipt to these details.</p>
+        
+        <div class="wizard-form-group">
+          <label for="applicantName">Full name</label>
+          <input type="text" id="applicantName" placeholder="e.g. Alex Johnson" required>
+        </div>
+
+        <div class="wizard-form-group">
+          <label for="applicantEmail">Email address</label>
+          <input type="email" id="applicantEmail" placeholder="you@example.com" required>
+        </div>
+
+        <div class="wizard-form-group">
+          <label for="applicantPhone">M-Pesa Phone Number</label>
+          <input type="text" id="applicantPhone" placeholder="e.g. 0712345678" required>
+        </div>
+
+        <div class="wizard-buttons">
+          <button type="button" class="btn-back" id="backToStep1Btn">Back</button>
+          <button type="button" class="btn-pay" id="toStep3Btn" disabled>Next: Documents <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="wizard-step" id="step3">
+        <h2 style="font-size: 1.5rem; color: #0b2b26; margin-bottom: 0.5rem;">Document Checklist</h2>
+        <p style="color: #4b6560; font-size: 0.95rem; margin-bottom: 1.5rem;">Please check the boxes for the documents you already have. <strong>Don't worry if you are missing some</strong> — our team will assist you in acquiring them during your appointment.</p>
+        
+        <div id="documentList"></div>
+
+        <div class="wizard-buttons">
+          <button type="button" class="btn-back" id="backToStep2Btn">Back</button>
+          <button type="button" class="btn-pay" id="toStep4Btn">Proceed to Payment <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="wizard-step" id="step4">
+        <h2 style="font-size: 1.5rem; color: #0b2b26; margin-bottom: 0.5rem;">Secure Payment</h2>
+        <p style="color: #4b6560; font-size: 0.95rem; margin-bottom: 1.5rem;">A one-time registration fee is required to confirm your appointment and process your application.</p>
+        
+        <div class="fee-box" style="margin-bottom: 1.5rem;">
+          <div class="label">
+            <i class="fas fa-shield-alt"></i> Registration fee
+            <div id="kesFeeNotice" style="font-size: 0.75rem; color: #6b8f86; margin-top: 0.2rem; font-weight: normal;"></div>
+          </div>
+          <div class="amount" id="modalFeeAmount">€0</div>
+        </div>
+
+        <div class="terms-agreement">
+          <label class="checkbox-container">
+            <input type="checkbox" id="agreeTerms" required>
+            <span class="checkmark"></span>
+            <span class="checkbox-text">
+              I have read and agree to the 
+              <a href="#" id="openTermsBtn">Terms & Conditions</a>.
+            </span>
+          </label>
+        </div>
+
+        <div class="fee-notice">
+          <i class="fas fa-info-circle"></i>
+          <span><strong>Notice:</strong> You will receive an M-Pesa prompt on your phone to complete this payment securely.</span>
+        </div>
+
+        <div class="wizard-buttons">
+          <button type="button" class="btn-back" id="backToStep3Btn">Back</button>
+          <button type="button" class="btn-pay" id="payBtn" disabled><i class="fas fa-lock"></i> Pay & Confirm</button>
+        </div>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="wizard-step" id="stepSuccess">
+        <div class="success-state">
+          <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+          <h3>Appointment Confirmed!</h3>
+          <p style="margin-top: 1rem;">Your payment was successful. We have booked your interview for <strong id="successDate"></strong> at <strong id="successTime"></strong>. A confirmation email has been sent.</p>
+          
+          <div id="missingDocsNotice" style="display: none; background: #fff8ec; border: 1px solid #ffe1b3; border-radius: 14px; padding: 1rem; margin: 1.5rem 0; text-align: left;">
+            <p style="font-size: 0.9rem; color: #8a5300; margin: 0;"><strong>Note regarding missing documents:</strong> You indicated that you are missing some required documents. Do not worry! Our migration experts will guide you on how to obtain them during your scheduled appointment.</p>
+          </div>
+
+          <a href="index.html" class="btn-pay" style="text-decoration: none; margin-top: 1rem; display: inline-flex;">
+            <i class="fas fa-home"></i> Return to Job Board
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- TERMS MODAL -->
+  <div class="modal-overlay" id="termsModal">
+    <div class="modal" style="max-width: 650px;" role="dialog">
+      <button class="modal-close" id="closeTermsBtn"><i class="fas fa-times"></i></button>
+      <div class="modal-icon" style="background:#f0f7f4; color:#1e6f5c;"><i class="fas fa-file-contract"></i></div>
+      <h3>Terms & Conditions</h3>
+      <div class="terms-content" style="max-height: 50vh; overflow-y: auto; margin-top: 1.5rem; color: #4b6560; font-size: 0.9rem; line-height: 1.6;">
+        <p style="margin-bottom: 1rem;"><strong>1. Registration Fee:</strong> A one-time, non-refundable registration fee is required to process and verify your application. This fee specifically covers administrative costs, background checks, and the facilitation of linking your profile with potential employers. Once a successful employment offer is secured, MapleLux Jobs will provide free relocation facilitation to your place of work.</p>
+        <p style="margin-bottom: 1rem;"><strong>2. No Placement Guarantee:</strong> Payment does not guarantee a job offer.</p>
+        <p style="margin-bottom: 1rem;"><strong>3. Refund Eligibility:</strong> Refunds are only issued if an employer cancels a listing before review.</p>
+      </div>
+      <button class="btn-pay" id="acceptTermsBtn" style="margin-top: 1.5rem;"><i class="fas fa-check"></i> I Understand</button>
+    </div>
+  </div>
+
+  <script>
+    const exchangeRates = { CAD: 124.50, EUR: 184.80 };
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const jobTitle = urlParams.get('title') || 'Job Role';
+    const company = urlParams.get('company') || 'Company';
+    const country = urlParams.get('country') || 'canada';
+    const fee = parseFloat(urlParams.get('fee')) || 10;
+    
+    const isCanada = country === 'canada';
+    const currency = isCanada ? 'CAD' : 'EUR';
+    const currencySymbol = isCanada ? 'CAD ' : '€';
+    const kesFee = Math.ceil(fee * exchangeRates[currency]);
+
+    document.getElementById('summaryJobTitle').textContent = jobTitle;
+    document.getElementById('summaryCompany').textContent = company;
+    document.getElementById('summaryFee').textContent = `${currencySymbol}${fee}`;
+    document.getElementById('modalFeeAmount').innerHTML = `${currencySymbol}${fee}`;
+    document.getElementById('kesFeeNotice').textContent = `≈ ${kesFee.toLocaleString()} KES`;
+    document.getElementById('payBtn').innerHTML = `<i class="fas fa-lock"></i> Pay ${currencySymbol}${fee} (≈ ${kesFee} KES)`;
+
+    const canadaDocs = [
+      { title: "Valid Passport", desc: "Must be valid for at least 6 months." },
+      { title: "Language Test Results", desc: "IELTS or CELPIP results showing proficiency." },
+      { title: "Educational Credential Assessment (ECA)", desc: "A report (e.g., from WES) verifying your Kenyan degrees meet Canadian standards." },
+      { title: "Proof of Funds", desc: "Bank statements showing you meet the settlement fund threshold (approx KSh 1.3M)." },
+      { title: "Police Clearance Certificate", desc: "A valid Certificate of Good Conduct from the DCI in Kenya." },
+      { title: "Medical Examination", desc: "Proof of physical fitness from an IRCC-approved panel physician." },
+      { title: "Employment Documents", desc: "Reference letters from previous employers, a detailed CV, and proof of work experience." },
+      { title: "Job Offer & LMIA (If applicable)", desc: "A formal job offer letter and a positive Labour Market Impact Assessment from the employer." }
+    ];
+
+    const luxembourgDocs = [
+      { title: "Valid Passport", desc: "Issued within the last 10 years and valid for at least 3 months beyond intended stay." },
+      { title: "Temporary Authorization to Stay", desc: "The critical document issued by the Luxembourg Ministry before applying for a visa." },
+      { title: "Employment Contract", desc: "A certified, signed contract with a Luxembourg-based employer." },
+      { title: "Police Clearance Certificate", desc: "A certified Certificate of Good Conduct from Kenya, authenticated for use abroad." },
+      { title: "Professional Qualifications", desc: "Certified, translated copies of your diplomas, academic transcripts, and CV." },
+      { title: "Proof of Accommodation", desc: "A lease agreement or hotel booking covering your initial arrival." },
+      { title: "Medical Certificate", desc: "Proof of health fitness (mandatory medical screening occurs upon arrival)." }
+    ];
+
+    const docsToRender = isCanada ? canadaDocs : luxembourgDocs;
+    const docList = document.getElementById('documentList');
+    let missingDocsCount = 0;
+
+    docsToRender.forEach((doc, index) => {
+      const label = document.createElement('label');
+      label.className = 'doc-item';
+      label.innerHTML = `
+        <input type="checkbox" class="doc-checkbox" data-index="${index}">
+        <div class="doc-item-text">
+          <strong>${doc.title}</strong>
+          <span>${doc.desc}</span>
+        </div>
+      `;
+      docList.appendChild(label);
+    });
+
+    function generateAvailableDates() {
+      const dateSelect = document.getElementById('apptDate');
+      dateSelect.innerHTML = '<option value="">Choose an available date</option>';
+      
+      let currentDate = new Date();
+      let workingDaysCount = 0;
+      let addedValidDates = 0;
+
+      while (addedValidDates < 3) {
+        currentDate.setDate(currentDate.getDate() + 1); 
+        const dayOfWeek = currentDate.getDay(); 
+
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+          workingDaysCount++;
+          
+          const yyyy = currentDate.getFullYear();
+          const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+          const dd = String(currentDate.getDate()).padStart(2, '0');
+          const dateValue = `${yyyy}-${mm}-${dd}`;
+          const dateText = currentDate.toLocaleDateString('en-US', { 
+            weekday: 'short', month: 'short', day: 'numeric' 
+          });
+
+          const option = document.createElement('option');
+
+          if (workingDaysCount <= 5) {
+            option.value = "";
+            option.textContent = `❌ ${dateText} (Fully Booked)`;
+            option.disabled = true;
+          } else {
+            option.value = dateValue;
+            option.textContent = `✅ ${dateText}`;
+            addedValidDates++;
+          }
+          
+          dateSelect.appendChild(option);
+        }
+      }
+    }
+    generateAvailableDates();
+
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    const step4 = document.getElementById('step4');
+    const stepSuccess = document.getElementById('stepSuccess');
+    
+    const ind1 = document.getElementById('step1-indicator');
+    const ind2 = document.getElementById('step2-indicator');
+    const ind3 = document.getElementById('step3-indicator');
+    const ind4 = document.getElementById('step4-indicator');
+
+    const apptDate = document.getElementById('apptDate');
+    const apptTime = document.getElementById('apptTime');
+    const applicantName = document.getElementById('applicantName');
+    const applicantEmail = document.getElementById('applicantEmail');
+    const applicantPhone = document.getElementById('applicantPhone');
+    const agreeTerms = document.getElementById('agreeTerms');
+
+    function validateStep1() {
+      document.getElementById('toStep2Btn').disabled = !(apptDate.value && apptTime.value);
+    }
+    apptDate.addEventListener('change', validateStep1);
+    apptTime.addEventListener('change', validateStep1);
+
+    function validateStep2() {
+      document.getElementById('toStep3Btn').disabled = !(applicantName.value.trim() && applicantEmail.value.trim() && applicantPhone.value.trim());
+    }
+    applicantName.addEventListener('input', validateStep2);
+    applicantEmail.addEventListener('input', validateStep2);
+    applicantPhone.addEventListener('input', validateStep2);
+
+    agreeTerms.addEventListener('change', (e) => {
+      document.getElementById('payBtn').disabled = !e.target.checked;
+    });
+
+    function goToStep(current, next, currentInd, nextInd) {
+      current.classList.remove('active');
+      next.classList.add('active');
+      currentInd.classList.remove('active');
+      nextInd.classList.add('active');
+    }
+
+    document.getElementById('toStep2Btn').addEventListener('click', () => goToStep(step1, step2, ind1, ind2));
+    document.getElementById('backToStep1Btn').addEventListener('click', () => goToStep(step2, step1, ind2, ind1));
+    
+    document.getElementById('toStep3Btn').addEventListener('click', () => goToStep(step2, step3, ind2, ind3));
+    document.getElementById('backToStep2Btn').addEventListener('click', () => goToStep(step3, step2, ind3, ind2));
+    
+    document.getElementById('toStep4Btn').addEventListener('click', () => {
+      const checkboxes = document.querySelectorAll('.doc-checkbox');
+      const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+      missingDocsCount = checkboxes.length - checkedCount;
+      goToStep(step3, step4, ind3, ind4);
+    });
+    
+    document.getElementById('backToStep3Btn').addEventListener('click', () => goToStep(step4, step3, ind4, ind3));
+
+    document.getElementById('payBtn').addEventListener('click', async () => {
+      const payBtn = document.getElementById('payBtn');
+      payBtn.disabled = true;
+      payBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending M-Pesa Prompt...`;
+
+      try {
+        const response = await fetch('https://maplelux-jobs.onrender.com/api/mpesa/stkpush', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            phone: applicantPhone.value.trim(), 
+            amount: kesFee 
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Server error");
+        }
+
+        if (data.ResponseCode === '0') {
+          const checkoutId = data.CheckoutRequestID;
+          alert('Please check your phone for the M-Pesa prompt and enter your PIN.');
+          payBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Waiting for PIN...`;
+
+          let attempts = 0;
+          const pollInterval = setInterval(async () => {
+            attempts++;
+            
+            try {
+              const statusRes = await fetch(`https://maplelux-jobs.onrender.com/api/mpesa/status/${checkoutId}`);
+              const statusData = await statusRes.json();
+
+              if (statusData.status === 'success') {
+                clearInterval(pollInterval);
+                
+                step4.classList.remove('active');
+                stepSuccess.classList.add('active');
+                ind4.classList.remove('active');
+                
+                const selectedOption = apptDate.options[apptDate.selectedIndex];
+                const bookedDate = selectedOption.text.replace('✅ ', '');
+                const bookedTime = apptTime.value;
+                
+                document.getElementById('successDate').textContent = bookedDate;
+                document.getElementById('successTime').textContent = bookedTime;
+
+                const missingDocTitles = [];
+                document.querySelectorAll('.doc-checkbox').forEach((checkbox, index) => {
+                  if (!checkbox.checked) {
+                    missingDocTitles.push(docsToRender[index].title);
+                  }
+                });
+
+                if (missingDocTitles.length > 0) {
+                  document.getElementById('missingDocsNotice').style.display = 'block';
+                }
+
+                try {
+                  await fetch('https://maplelux-jobs.onrender.com/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      to: applicantEmail.value.trim(),
+                      name: applicantName.value.trim(),
+                      jobTitle: jobTitle,
+                      date: bookedDate,
+                      time: bookedTime,
+                      missingDocs: missingDocTitles 
+                    })
+                  });
+                } catch (err) {
+                  console.error("Email failed to send", err);
+                }
+
+              } else if (statusData.status === 'failed') {
+                clearInterval(pollInterval);
+                alert(`Payment Failed: ${statusData.reason}`);
+                payBtn.disabled = false;
+                payBtn.innerHTML = `<i class="fas fa-lock"></i> Try Payment Again`;
+              
+              } else if (attempts > 20) { 
+                clearInterval(pollInterval);
+                alert('Payment timed out. Please try again.');
+                payBtn.disabled = false;
+                payBtn.innerHTML = `<i class="fas fa-lock"></i> Try Payment Again`;
+              }
+            } catch (err) {
+              console.error("Error checking status", err);
+            }
+          }, 3000);
+
+        } else {
+          throw new Error(data.errorMessage || 'STK Push failed');
+        }
+      } catch (error) {
+        console.error(error);
+        alert(`Payment Failed!\n\nReason: ${error.message}`);
+        payBtn.disabled = false;
+        payBtn.innerHTML = `<i class="fas fa-lock"></i> Try Payment Again`;
+      }
+    });
+
+    const termsModal = document.getElementById('termsModal');
+    document.getElementById('openTermsBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      termsModal.classList.add('active');
+    });
+    document.getElementById('closeTermsBtn').addEventListener('click', () => termsModal.classList.remove('active'));
+    document.getElementById('acceptTermsBtn').addEventListener('click', () => termsModal.classList.remove('active'));
+  </script>
+</body>
+</html>
