@@ -46,6 +46,8 @@ async function getAccessToken() {
 
 app.post('/api/mpesa/stkpush', async (req, res) => {
   const { phone, amount } = req.body;
+    // Safety check: Ensure the minimum fee is 10
+  const finalAmount = amount < 10 ? 10 : amount;
   try {
     const token = await getAccessToken();
     const eatTime = new Date(Date.now() + 3 * 60 * 60 * 1000);
