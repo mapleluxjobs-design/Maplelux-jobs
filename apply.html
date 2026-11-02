@@ -6,8 +6,9 @@
   <title>Book Appointment & Pay · MapleLux Jobs</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- CRITICAL WIZARD STYLES -->
   <style>
-    /* WIZARD SPECIFIC STYLES */
     .wizard-container { max-width: 650px; margin: 3rem auto; background: white; border-radius: 28px; padding: 2.5rem; box-shadow: 0 10px 30px rgba(0,30,20,0.05); border: 1px solid #e9f3ef; }
     .step-indicator { display: flex; justify-content: space-between; margin-bottom: 2rem; position: relative; }
     .step-indicator::before { content: ''; position: absolute; top: 15px; left: 0; right: 0; height: 2px; background: #e2f0ea; z-index: 1; }
@@ -397,6 +398,11 @@
         mpesaNotice.style.display = 'flex';
         manualNotice.style.display = 'none';
       } else {
+        payBtn.style.display = 'none';
+        manualPayBtn.style.display = 'flex';
+        mpesaNotice.style.display = 'none';
+        manualNotice.style.display = 'block';
+
         if (selectedValue.includes('Uganda')) {
           phoneLabel.textContent = 'MTN Uganda Phone Number';
           phoneInput.placeholder = 'e.g. 0771234567';
@@ -430,11 +436,6 @@
             </div>
           `;
         }
-
-        payBtn.style.display = 'none';
-        manualPayBtn.style.display = 'flex';
-        mpesaNotice.style.display = 'none';
-        manualNotice.style.display = 'block';
       }
 
       let localCurrency = currency; 
@@ -518,22 +519,6 @@
       });
 
       try {
-        await fetch('http://localhost:3000/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: applicantEmail.value.trim(),
-            name: applicantName.value.trim(),
-            jobTitle: jobTitle,
-            date: bookedDate,
-            time: bookedTime,
-            missingDocs: missingDocTitles,
-            officeLocation: officeLocation
-          })
-        });
-      } catch (err) { console.error("Email error", err); }
-
-      try {
         const response = await fetch('http://localhost:3000/api/mpesa/stkpush', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -545,7 +530,7 @@
 
         if (data.ResponseCode === '0') {
           const checkoutId = data.CheckoutRequestID;
-          alert('Email sent. Please check your phone for the M-Pesa prompt and enter your PIN.');
+          alert('Please check your phone for the M-Pesa prompt and enter your PIN.');
           payBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Waiting...`;
 
           let attempts = 0;
@@ -557,6 +542,23 @@
 
               if (statusData.status === 'success') {
                 clearInterval(pollInterval);
+                
+                try {
+                  await fetch('http://localhost:3000/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      to: applicantEmail.value.trim(),
+                      name: applicantName.value.trim(),
+                      jobTitle: jobTitle,
+                      date: bookedDate,
+                      time: bookedTime,
+                      missingDocs: missingDocTitles,
+                      officeLocation: officeLocation
+                    })
+                  });
+                } catch (err) { console.error("Email error", err); }
+
                 step4.classList.remove('active');
                 stepSuccess.classList.add('active');
                 ind4.classList.remove('active');
@@ -645,7 +647,7 @@
         <h3>Payment Pending Verification</h3>
         <p style="margin-top: 1rem;">Thank you, <strong>${applicantName.value.trim()}</strong>. We have received your booking request.</p>
         <p style="margin-top: 1rem; color: #8a5300; background: #fff8ec; padding: 1rem; border-radius: 12px; border: 1px solid #ffe1b3; text-align: left;">
-          <strong>Action Required:</strong> Please ensure you have sent the payment via ${officeCountry === 'Uganda' ? 'MTN' : 'Sendwave'}. Once our team verifies the funds, you will receive a confirmation email with your official appointment details.
+          <strong>Action Required:</strong> Please ensure you have sent the payment via ${officeCountry === 'Kenya' ? 'M-Pesa' : officeCountry === 'Uganda' ? 'MTN' : 'Sendwave'}. Once our team verifies the funds, you will receive a confirmation email with your official appointment details.
         </p>
         <a href="index.html" class="btn-pay" style="text-decoration: none; margin-top: 1.5rem; display: inline-flex;">
           <i class="fas fa-home"></i> Return to Job Board
