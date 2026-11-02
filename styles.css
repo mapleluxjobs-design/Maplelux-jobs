@@ -682,6 +682,79 @@ a {
 }
 
 /* =========================================
+   PREMIUM RECEIPT & TRUST BADGES
+   ========================================= */
+.premium-receipt {
+  background: #ffffff;
+  border: 1px solid #e2f0ea;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -10px rgba(30, 111, 92, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.receipt-header {
+  background: #1e6f5c;
+  color: white;
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.receipt-body {
+  padding: 1.5rem;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  color: #4b6560;
+  margin-bottom: 1rem;
+}
+
+.receipt-divider {
+  height: 1px;
+  background: #e2f0ea;
+  margin: 1rem 0;
+}
+
+.receipt-row.total {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0b2b26;
+  margin-bottom: 0;
+}
+
+.receipt-row.total span:last-child {
+  color: #1e6f5c;
+}
+
+.trust-badges {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.trust-badge {
+  background: #f9fdfb;
+  border: 1px solid #cbe6dc;
+  color: #1a5a4b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* =========================================
    RESPONSIVE DESIGN
    ========================================= */
 @media (max-width: 768px) {
@@ -745,74 +818,4 @@ a {
     margin-left: 0;
     width: 100%;
   }
-  /* Premium Receipt Styling */
-.premium-receipt {
-  background: white;
-  border: 1px solid #e2f0ea;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px -10px rgba(30, 111, 92, 0.15);
-  margin-bottom: 1.5rem;
-}
-
-.receipt-header {
-  background: #1e6f5c;
-  color: white;
-  padding: 0.8rem 1.2rem;
-  font-weight: 700;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.receipt-body {
-  padding: 1.2rem;
-}
-
-.receipt-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.95rem;
-  color: #4b6560;
-  margin-bottom: 0.8rem;
-}
-
-.receipt-divider {
-  height: 1px;
-  background: #e2f0ea;
-  margin: 1rem 0;
-}
-
-.receipt-row.total {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #0b2b26;
-  margin-bottom: 0;
-}
-
-.receipt-row.total span:last-child {
-  color: #1e6f5c;
-}
-
-/* Trust Badges */
-.trust-badges {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.trust-badge {
-  background: #f9fdfb;
-  border: 1px solid #cbe6dc;
-  color: #1a5a4b;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
 }

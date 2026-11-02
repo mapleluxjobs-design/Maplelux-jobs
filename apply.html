@@ -167,8 +167,7 @@
         </div>
       </div>
 
-      
-        <!-- STEP 4 -->
+      <!-- STEP 4 -->
       <div class="wizard-step" id="step4">
         <h2 style="font-size: 1.5rem; color: #0b2b26; margin-bottom: 0.5rem;">Secure Payment</h2>
         <p style="color: #4b6560; font-size: 0.95rem; margin-bottom: 1.5rem;">Complete your booking by paying the registration fee. This securely links your profile to the employer.</p>
@@ -176,7 +175,7 @@
         <!-- IMPRESSIVE RECEIPT BOX -->
         <div class="premium-receipt">
           <div class="receipt-header">
-            <i class="fas fa-shield-check"></i> Secure Checkout
+            <i class="fas fa-shield-alt"></i> Secure Checkout
           </div>
           
           <div class="receipt-body">
@@ -204,6 +203,9 @@
           <div class="trust-badge">
             <i class="fas fa-check-circle"></i> Verified Safaricom Partner
           </div>
+          <div class="trust-badge">
+            <i class="fas fa-undo"></i> 90-Day Refund Guarantee
+          </div>
         </div>
 
         <div class="terms-agreement">
@@ -211,7 +213,7 @@
             <input type="checkbox" id="agreeTerms" required>
             <span class="checkmark"></span>
             <span class="checkbox-text">
-              I agree to the <a href="#" id="openTermsBtn">Terms & Conditions</a> and confirm my booking.
+              I agree to the <a href="#" id="openTermsBtn">Terms & Conditions</a> and understand the <strong>90-day refund guarantee</strong>.
             </span>
           </label>
         </div>
@@ -226,6 +228,7 @@
           <button type="button" class="btn-pay" id="payBtn" disabled><i class="fas fa-lock"></i> Pay & Confirm</button>
         </div>
       </div>
+
       <!-- SUCCESS -->
       <div class="wizard-step" id="stepSuccess">
         <div class="success-state">
@@ -253,9 +256,15 @@
       <div class="modal-icon" style="background:#f0f7f4; color:#1e6f5c;"><i class="fas fa-file-contract"></i></div>
       <h3>Terms & Conditions</h3>
       <div class="terms-content" style="max-height: 50vh; overflow-y: auto; margin-top: 1.5rem; color: #4b6560; font-size: 0.9rem; line-height: 1.6;">
-        <p style="margin-bottom: 1rem;"><strong>1. Registration Fee:</strong> A one-time, non-refundable registration fee is required to process and verify your application. This fee specifically covers administrative costs, background checks, and the facilitation of linking your profile with potential employers. Once a successful employment offer is secured, MapleLux Jobs will provide free relocation facilitation to your place of work.</p>
-        <p style="margin-bottom: 1rem;"><strong>2. No Placement Guarantee:</strong> Payment does not guarantee a job offer.</p>
-        <p style="margin-bottom: 1rem;"><strong>3. Refund Eligibility:</strong> Refunds are only issued if an employer cancels a listing before review.</p>
+        <p style="margin-bottom: 1rem;"><strong>1. Registration Fee:</strong> A one-time registration fee is required to process and verify your application. This fee specifically covers administrative costs, background checks, and the facilitation of linking your profile with potential employers.</p>
+        
+        <p style="margin-bottom: 1rem;"><strong>2. Free Relocation:</strong> Once a successful employment offer is secured, MapleLux Jobs will provide free relocation facilitation to your place of work.</p>
+        
+        <p style="margin-bottom: 1rem;"><strong>3. Refundable Clause (Guarantee):</strong> We stand by our service. If you are not successfully placed in a job within <strong>90 days</strong> of your payment, you are eligible for a <strong>100% full refund</strong> of your registration fee. To claim a refund, you must have attended all scheduled interviews and provided accurate information.</p>
+        
+        <p style="margin-bottom: 1rem;"><strong>4. No Placement Guarantee:</strong> While we offer a refund, payment of the fee does not guarantee an immediate job offer.</p>
+        
+        <p style="margin-bottom: 1rem;"><strong>5. Refund Process:</strong> Approved refunds will be processed back to the original M-Pesa phone number used for payment within 3–5 business days.</p>
       </div>
       <button class="btn-pay" id="acceptTermsBtn" style="margin-top: 1.5rem;"><i class="fas fa-check"></i> I Understand</button>
     </div>
