@@ -189,7 +189,7 @@
 
       try {
         // Send the final confirmation email to the client
-        await fetch('http://localhost:3000/api/send-email', { // Change to Render URL on live
+        await fetch('https://maplelux-jobs.onrender.com/api/send-email',  { // Change to Render URL on live
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
