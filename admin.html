@@ -6,6 +6,9 @@
   <title>Admin Dashboard · MapleLux Jobs</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- ADDED: Supabase Script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -18,31 +21,12 @@
       <a href="index.html">← Back to Job Board</a>
       <a href="#" style="color: #1e6f5c; font-weight: 700;"><i class="fas fa-lock"></i> Admin Access</a>
     </div>
-    <button class="btn-outline" id="logoutBtn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </header>
 
   <main class="container" style="max-width: 900px;">
     
-    <!-- Login Box -->
-    <div id="loginBox" class="modal" style="position: relative; margin: 4rem auto; display: block;">
-      <div class="modal-icon" style="background:#e5f3ee; color:#1e6f5c;"><i class="fas fa-user-shield"></i></div>
-      <h3>Admin Login</h3>
-      <p>You must be an administrator to view pending payments and post jobs.</p>
-      
-      <form id="adminLoginForm">
-        <label for="adminPassword">Password</label>
-        <input type="password" id="adminPassword" placeholder="Enter admin password" required>
-        <button type="submit" class="btn-pay" style="margin-top: 1rem;">
-          <i class="fas fa-sign-in-alt"></i> Login
-        </button>
-      </form>
-      <div class="modal-footnote" style="margin-top: 1rem;">
-        Demo password: <strong>admin123</strong>
-      </div>
-    </div>
-
-    <!-- Admin Dashboard (Hidden by default) -->
-    <div id="adminDashboard" style="display: none; margin-top: 3rem;">
+    <!-- Admin Dashboard (Visible by default now) -->
+    <div id="adminDashboard" style="margin-top: 3rem;">
       
       <!-- SECTION 1: Pending Payments -->
       <div class="category-header" style="margin-top: 0;">
@@ -111,44 +95,29 @@
   </main>
 
   <script>
-    const adminPassword = "admin123"; 
-    const loginBox = document.getElementById('loginBox');
-    const adminDashboard = document.getElementById('adminDashboard');
-    const adminLoginForm = document.getElementById('adminLoginForm');
-    const logoutBtn = document.getElementById('logoutBtn');
+    // === SUPABASE CREDENTIALS ===
+    const SUPABASE_URL = 'https://erugiqutafquqxbaekd.supabase.co'; 
+    const SUPABASE_KEY = 'sb_publishable_AfZsPHIN8REUncmvk-5nvg_WNg443aZ'; 
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    if (sessionStorage.getItem('isAdmin') === 'true') {
-      showDashboard();
-    }
-
-    adminLoginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const enteredPassword = document.getElementById('adminPassword').value;
-      
-      if (enteredPassword === adminPassword) {
-        sessionStorage.setItem('isAdmin', 'true');
-        showDashboard();
-      } else {
-        alert('Incorrect password. Access denied.');
-      }
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      sessionStorage.removeItem('isAdmin');
-      location.reload();
-    });
-
-    function showDashboard() {
-      loginBox.style.display = 'none';
-      adminDashboard.style.display = 'block';
-      logoutBtn.style.display = 'block';
+    // Load data immediately on page load
+    window.addEventListener('DOMContentLoaded', () => {
       loadPendingPayments();
-    }
+    });
 
-    // --- LOAD & APPROVE PENDING PAYMENTS ---
-    function loadPendingPayments() {
+    // --- LOAD & APPROVE PENDING PAYMENTS (FROM SUPABASE) ---
+    async function loadPendingPayments() {
       const pendingList = document.getElementById('pendingList');
-      let pendingBookings = JSON.parse(localStorage.getItem('mapleLuxPending')) || [];
+      
+      const { data: pendingBookings, error } = await supabase
+        .from('pending_payments')
+        .select('*')
+        .eq('status', 'pending');
+
+      if (error) {
+        pendingList.innerHTML = `<p style="color: red;">Error loading payments: ${error.message}</p>`;
+        return;
+      }
 
       if (pendingBookings.length === 0) {
         pendingList.innerHTML = `<p style="color: #6b8f86; text-align: center; padding: 2rem; background: white; border-radius: 16px; border: 1px solid #e2f0ea;">No pending payments to verify.</p>`;
@@ -161,11 +130,11 @@
             <i class="fas fa-clock"></i> Pending Verification: ${booking.name} (${booking.country})
           </div>
           <div class="receipt-body">
-            <div class="receipt-row"><span>Job:</span> <strong>${booking.jobTitle}</strong></div>
+            <div class="receipt-row"><span>Job:</span> <strong>${booking.job_title}</strong></div>
             <div class="receipt-row"><span>Email:</span> <strong>${booking.email}</strong></div>
             <div class="receipt-row"><span>Phone:</span> <strong>${booking.phone}</strong></div>
             <div class="receipt-row"><span>Date & Time:</span> <strong>${booking.date} at ${booking.time}</strong></div>
-            <div class="receipt-row"><span>Office:</span> <strong>${booking.officeLocation}</strong></div>
+            <div class="receipt-row"><span>Office:</span> <strong>${booking.office_location}</strong></div>
             
             <div style="margin-top: 1rem; display: flex; gap: 1rem;">
               <button onclick="approvePayment(${booking.id})" class="btn-pay" style="background: #1e6f5c; padding: 0.8rem;">
@@ -182,30 +151,27 @@
 
     // --- APPROVE PAYMENT ---
     window.approvePayment = async function(id) {
-      let pendingBookings = JSON.parse(localStorage.getItem('mapleLuxPending')) || [];
-      const booking = pendingBookings.find(b => b.id === id);
-
+      const { data: booking } = await supabase.from('pending_payments').select('*').eq('id', id).single();
       if (!booking) return;
 
       try {
         // Send the final confirmation email to the client
-        await fetch('https://maplelux-jobs.onrender.com/api/send-email',  { // Change to Render URL on live
+        await fetch('https://maplelux-jobs.onrender.com/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             to: booking.email,
             name: booking.name,
-            jobTitle: booking.jobTitle,
+            jobTitle: booking.job_title,
             date: booking.date,
             time: booking.time,
-            missingDocs: booking.missingDocs,
-            officeLocation: booking.officeLocation
+            missingDocs: booking.missing_docs,
+            officeLocation: booking.office_location
           })
         });
 
-        // Remove from pending list
-        pendingBookings = pendingBookings.filter(b => b.id !== id);
-        localStorage.setItem('mapleLuxPending', JSON.stringify(pendingBookings));
+        // Mark as approved in Supabase
+        await supabase.from('pending_payments').update({ status: 'approved' }).eq('id', id);
         
         alert(`✅ Payment Approved. Confirmation email sent to ${booking.email}`);
         loadPendingPayments();
@@ -217,13 +183,10 @@
     };
 
     // --- REJECT PAYMENT ---
-    window.rejectPayment = function(id) {
-      if (!confirm("Are you sure you want to reject this payment? It will be removed from the list.")) return;
+    window.rejectPayment = async function(id) {
+      if (!confirm("Are you sure you want to reject this payment?")) return;
       
-      let pendingBookings = JSON.parse(localStorage.getItem('mapleLuxPending')) || [];
-      pendingBookings = pendingBookings.filter(b => b.id !== id);
-      localStorage.setItem('mapleLuxPending', JSON.stringify(pendingBookings));
-      
+      await supabase.from('pending_payments').update({ status: 'rejected' }).eq('id', id);
       loadPendingPayments();
     };
 
